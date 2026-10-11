@@ -85,9 +85,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         """
         if data.get("password") != data.get("password_confirm"):
-            raise serializers.ValidationError(
-                {"password_confirm": "Пароли не совпадают."}
-            )
+            raise serializers.ValidationError({"password_confirm": "Пароли не совпадают."})
         return data
 
     def create(self, validated_data: dict) -> User:
