@@ -11,9 +11,7 @@ def validate_habit(data):
 
     # 1. Нельзя одновременно связанную привычку и вознаграждение
     if related_habit and reward:
-        raise ValidationError(
-            "Нельзя одновременно указывать связанную привычку и вознаграждение."
-        )
+        raise ValidationError("Нельзя одновременно указывать связанную привычку и вознаграждение.")
 
     # 2. Время выполнения ≤ 120 секунд
     if duration and duration > 120:
@@ -21,18 +19,14 @@ def validate_habit(data):
 
     # 3. В связанные привычки только приятные
     if related_habit and not related_habit.is_pleasant:
-        raise ValidationError(
-            "В связанные привычки можно выбирать только приятные привычки."
-        )
+        raise ValidationError("В связанные привычки можно выбирать только приятные привычки.")
 
     # 4. У приятной привычки не может быть вознаграждения или связанной
     if is_pleasant:
         if reward:
             raise ValidationError("У приятной привычки не может быть вознаграждения.")
         if related_habit:
-            raise ValidationError(
-                "У приятной привычки не может быть связанной привычки."
-            )
+            raise ValidationError("У приятной привычки не может быть связанной привычки.")
 
     # 5. Периодичность не реже 1 раза в 7 дней
     if periodicity and (periodicity < 1 or periodicity > 7):
