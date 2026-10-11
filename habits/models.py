@@ -30,9 +30,7 @@ class Habit(models.Model):
         verbose_name="Время",
     )
     action = models.CharField(max_length=255, verbose_name="Действие")
-    is_pleasant = models.BooleanField(
-        default=False, verbose_name="Признак приятной привычки"
-    )
+    is_pleasant = models.BooleanField(default=False, verbose_name="Признак приятной привычки")
     related_habit = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -46,13 +44,9 @@ class Habit(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(7)],
         verbose_name="Периодичность (в днях)",
     )
-    last_reminded_at = models.DateTimeField(
-        null=True, blank=True, verbose_name="Последнее напоминание"
-    )
+    last_reminded_at = models.DateTimeField(null=True, blank=True, verbose_name="Последнее напоминание")
 
-    reward = models.CharField(
-        max_length=255, verbose_name="Вознаграждение", blank=True, null=True
-    )
+    reward = models.CharField(max_length=255, verbose_name="Вознаграждение", blank=True, null=True)
     duration = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(120)],
         verbose_name="Время на выполнение (в секундах)",
