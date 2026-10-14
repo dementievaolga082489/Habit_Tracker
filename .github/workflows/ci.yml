@@ -44,7 +44,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock', '**/pyproject.toml') }}
 
-      - run: poetry install --with test,lint --no-root
+      - run: poetry install --no-root
 
       - name: Run tests
         run: python manage.py test
