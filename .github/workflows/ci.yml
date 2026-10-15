@@ -113,7 +113,6 @@ jobs:
       - name: Setup SSH key
         env:
           SSH_KEY_BASE64: ${{ secrets.SSH_KEY_BASE64 }}
-          SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
@@ -122,9 +121,7 @@ jobs:
           echo "=== Key check ==="
           head -1 ~/.ssh/id_ed25519
           tail -1 ~/.ssh/id_ed25519
-          ssh-keygen -l -f ~/.ssh/id_ed25519 || { echo "INVALID KEY"; exit 1; }
-
-          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
+          ssh-keygen -l -f ~/.ssh/id_ed25519
 
       - name: Deploy via SSH
         env:
@@ -134,7 +131,7 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 "$SSH_USER@$SERVER_IP" "
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519 "$SSH_USER@$SERVER_IP" "
             cd $DEPLOY_DIR &&
             echo '$DOCKER_HUB_ACCESS_TOKEN' | docker login -u '$DOCKER_HUB_USERNAME' --password-stdin &&
             docker compose pull &&
