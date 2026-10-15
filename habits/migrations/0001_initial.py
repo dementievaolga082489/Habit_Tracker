@@ -29,9 +29,7 @@ class Migration(migrations.Migration):
                 ("action", models.CharField(max_length=255, verbose_name="Действие")),
                 (
                     "is_pleasant",
-                    models.BooleanField(
-                        default=False, verbose_name="Признак приятной привычки"
-                    ),
+                    models.BooleanField(default=False, verbose_name="Признак приятной привычки"),
                 ),
                 (
                     "periodicity",
@@ -46,9 +44,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "last_reminded_at",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Последнее напоминание"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Последнее напоминание"),
                 ),
                 (
                     "reward",
@@ -71,15 +67,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "is_public",
-                    models.BooleanField(
-                        default=False, verbose_name="Признак публичности"
-                    ),
+                    models.BooleanField(default=False, verbose_name="Признак публичности"),
                 ),
                 (
                     "created_at",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Дата создания"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Дата создания"),
                 ),
                 (
                     "updated_at",
