@@ -39,11 +39,6 @@ jobs:
           virtualenvs-create: false
           virtualenvs-in-project: false
 
-#      - uses: actions/cache@v4
-#        with:
-#          path: .venv
-#          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock', '**/pyproject.toml') }}
-
       - run: poetry install --no-root
 
       - name: Run tests
@@ -115,34 +110,30 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
+      - name: Setup SSH key
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          echo "=== Key check ==="
+          head -1 ~/.ssh/id_ed25519
+          tail -1 ~/.ssh/id_ed25519
+          ssh-keygen -l -f ~/.ssh/id_ed25519 || { echo "INVALID KEY"; exit 1; }
+
+          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
           SSH_USER: ${{ secrets.SSH_USER }}
           DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
         run: |
-          echo "=== Проверка секретов ==="
-          echo "SERVER_IP='$SERVER_IP'"
-          echo "SSH_USER='$SSH_USER'"
-          echo "DEPLOY_DIR='$DEPLOY_DIR'"
-          echo "SSH_KEY length: ${#SSH_KEY}"
-          echo "SSH_KEY begins: $(echo "$SSH_KEY" | head -c 40)"
-          echo ""
-
-          echo "=== Настройка SSH ==="
-          mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts 2>/dev/null
-
-          echo "=== Тест SSH-подключения (verbose) ==="
-          ssh -v -o StrictHostKeyChecking=no -o ConnectTimeout=15 \
-              -i ~/.ssh/id_ed25519 "$SSH_USER@$SERVER_IP" "echo OK"
-
-          echo "=== Деплой ==="
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 "$SSH_USER@$SERVER_IP" "
             cd $DEPLOY_DIR &&
             echo '$DOCKER_HUB_ACCESS_TOKEN' | docker login -u '$DOCKER_HUB_USERNAME' --password-stdin &&
