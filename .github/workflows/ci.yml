@@ -115,15 +115,24 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_DIR }}
-            echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-            sudo docker compose pull
-            sudo docker compose up -d --remove-orphans
-            sudo docker image prune -f
+      - name: Deploy via SSH (pull from Docker Hub)
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts 2>/dev/null
+
+          ssh -i ~/.ssh/id_ed25519 "$SSH_USER@$SERVER_IP" "
+            cd $DEPLOY_DIR &&
+            echo '$DOCKER_HUB_ACCESS_TOKEN' | docker login -u '$DOCKER_HUB_USERNAME' --password-stdin &&
+            docker compose pull &&
+            docker compose up -d --remove-orphans &&
+            docker image prune -f
+          "
