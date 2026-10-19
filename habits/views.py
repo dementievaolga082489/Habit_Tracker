@@ -25,9 +25,7 @@ class HabitViewSet(viewsets.ModelViewSet):
         if self.action == "public":
             return Habit.objects.filter(is_public=True)
 
-        return Habit.objects.filter(user=self.request.user).select_related(
-            "user", "related_habit"
-        )
+        return Habit.objects.filter(user=self.request.user).select_related("user", "related_habit")
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -41,9 +39,7 @@ class HabitViewSet(viewsets.ModelViewSet):
         summary="Публичные привычки",
         description="Возвращает список публичных привычек.",
     )
-    @action(
-        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
-    )
+    @action(detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated])
     def public(self, request):
         """Список публичных привычек (только чтение)."""
         queryset = Habit.objects.filter(is_public=True)
